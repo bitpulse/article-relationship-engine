@@ -100,7 +100,13 @@ cp .env.example .env
 ## 🏃 Quick Start
 
 ```bash
-# Run the interactive demo to see the full power of relationship discovery
+# Run the AI search improvement demo (perfect for presentations)
+python demo_ai_search_fast.py
+
+# Launch the interactive Streamlit UI
+streamlit run app_ai_search.py
+
+# Run the full interactive demo
 python demo_relationship_discovery.py
 
 # Explore specific events and their hidden connections
