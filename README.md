@@ -100,12 +100,19 @@ cp .env.example .env
 ## 🏃 Quick Start
 
 ```bash
-# The system already includes rich news data with hidden relationships
-# Just run the demo to see it in action!
-python demo_showcase.py
+# Run the interactive demo to see the full power of relationship discovery
+python demo_relationship_discovery.py
 
-# Or explore specific relationship chains
-python explore_relationships.py "Trump tariffs"
+# Explore specific events and their hidden connections
+python explore_relationships.py search "Trump tariffs"
+python explore_relationships.py chain "Trump tariffs Mexico"
+python explore_relationships.py predict 1  # Predict impacts for article ID 1
+
+# Visualize causation chains
+python visualize_chain.py "US auto tariffs" "Brazilian soy exports"
+
+# Create an impact web visualization
+python visualize_chain.py "Trump tariffs" --impact-web --depth 3
 ```
 
 ## 📊 What You'll Discover
@@ -129,22 +136,37 @@ What signals should you watch for next?
 
 ## 🏗️ Architecture
 
-### News Ingestion Pipeline
-- GPT-powered entity extraction
-- Sentiment and impact analysis
-- Automatic categorization
-- Real-time processing
+### Core Components
 
-### Relationship Discovery Engine
-1. **Context Understanding**: Beyond keywords to actual meaning
-2. **Impact Propagation**: Trace effects across domains
-3. **Pattern Recognition**: Identify recurring cause-effect relationships
-4. **Prediction Generation**: Suggest likely future developments
+1. **News Ingestion Pipeline** (`src/news_ingestion.py`)
+   - GPT-powered entity extraction
+   - Sentiment and impact analysis
+   - Automatic categorization
+   - No fallback - quality guaranteed
 
-### Knowledge Graph
-- Nodes: Events, entities, concepts
-- Edges: Causal relationships with strength and type
-- Temporal dimension: How relationships evolve over time
+2. **Relationship Discovery Engine** (`src/relationship_engine.py`)
+   - Entity overlap and temporal proximity detection
+   - GPT-powered relationship classification
+   - Batch processing for efficiency
+   - Confidence scoring and caching
+
+3. **Causation Analyzer** (`src/causation_analyzer.py`)
+   - Builds directed graphs of cause-effect relationships
+   - Identifies root causes and traces ripple effects
+   - Detects feedback loops and patterns
+   - Temporal sequencing and validation
+
+4. **Impact Predictor** (`src/impact_predictor.py`)
+   - Analyzes historical patterns
+   - Predicts future impacts with timelines
+   - Identifies affected industries
+   - Generates early warning indicators
+
+5. **Knowledge Graph** (`src/knowledge_graph.py`)
+   - Multi-type nodes: Events, entities, concepts
+   - Pattern detection: Cascades, hubs, loops
+   - Path finding between events
+   - Interactive visualization support
 
 ## 💰 Value Proposition
 
@@ -190,12 +212,16 @@ Map complex cause-effect relationships in global events.
 - [x] Core relationship discovery engine
 - [x] Multi-domain impact analysis
 - [x] GPT-powered intelligence
-- [ ] Interactive relationship visualization
+- [x] Causation chain builder with pattern matching
+- [x] Impact prediction with timeline estimation
+- [x] Knowledge graph construction and queries
+- [x] Interactive relationship visualization
+- [x] Multi-hop reasoning (A→B→C→D connections)
+- [x] CLI tools for exploration and visualization
 - [ ] Real-time news feed integration
-- [ ] Multi-hop reasoning (A→B→C→D connections)
-- [ ] Temporal pattern analysis
-- [ ] Confidence scoring for predictions
+- [ ] Confidence scoring refinement
 - [ ] API for third-party integration
+- [ ] Web interface with Streamlit
 
 ## 🤝 Contributing
 

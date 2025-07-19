@@ -94,17 +94,19 @@ Result:
 ```
 article-relationship-engine/
 ├── src/
+│   ├── __init__.py               # Package initialization
 │   ├── news_ingestion.py         # Intelligent news processing with GPT
-│   ├── relationship_engine.py    # Core relationship discovery (TODO)
-│   ├── causation_analyzer.py     # Cause-effect chain builder (TODO)
-│   ├── impact_predictor.py       # Future impact prediction (TODO)
-│   ├── knowledge_graph.py        # Graph construction & queries (TODO)
-│   └── config.py                 # Configuration
+│   ├── config.py                 # Configuration and constants
+│   ├── relationship_engine.py    # Core relationship discovery ✅
+│   ├── causation_analyzer.py     # Cause-effect chain builder ✅
+│   ├── impact_predictor.py       # Future impact prediction ✅
+│   └── knowledge_graph.py        # Graph construction & queries ✅
 ├── data/
 │   └── news.json                 # Rich dataset with hidden connections
-├── demo_showcase.py              # Interactive demonstration
-├── explore_relationships.py      # Relationship exploration tool (TODO)
-└── requirements.txt              # Dependencies
+├── explore_relationships.py      # CLI tool for exploration ✅
+├── demo_relationship_discovery.py # Interactive demonstration ✅
+├── visualize_chain.py            # Causation chain visualization ✅
+└── requirements.txt              # Dependencies (updated)
 ```
 
 ## 🔧 Current Implementation
@@ -124,48 +126,41 @@ article-relationship-engine/
    - Multiple domains (auto, agriculture, finance, etc.)
    - Temporal progression showing cause and effect
 
-### 🚧 Next Implementation Steps
+3. **Relationship Discovery Engine** (`src/relationship_engine.py`) ✅
+   - Entity overlap and temporal proximity detection
+   - GPT-powered relationship classification
+   - Batch processing for API efficiency
+   - Confidence scoring and result caching
+   - Impact web exploration
 
-1. **Relationship Discovery Engine** (`relationship_engine.py`)
-   ```python
-   class RelationshipDiscoveryEngine:
-       def discover_relationships(self, article: Dict) -> List[Relationship]:
-           """
-           For a given article, discover all related articles and their
-           relationship types (cause, effect, retaliation, opportunity, etc.)
-           """
-           
-       def build_causation_chain(self, event: str) -> CausationChain:
-           """
-           Build the full cause-effect chain for an event
-           E.g., Tariffs → Stock Drop → Production Shift → Job Impact
-           """
-   ```
+4. **Causation Analyzer** (`src/causation_analyzer.py`) ✅
+   - Directed graph construction from all relationships
+   - Chain building with pattern matching
+   - Root cause identification
+   - Ripple effect tracking across industries
+   - Feedback loop detection
+   - Cross-industry impact analysis
 
-2. **Impact Prediction** (`impact_predictor.py`)
-   ```python
-   class ImpactPredictor:
-       def predict_ripple_effects(self, event: Dict) -> List[Prediction]:
-           """
-           Based on the event and historical patterns, predict:
-           - Which industries will be affected
-           - What types of responses to expect
-           - Timeline of effects
-           """
-   ```
+5. **Impact Predictor** (`src/impact_predictor.py`) ✅
+   - Historical pattern database construction
+   - GPT-4 powered prediction generation
+   - Timeline estimation with confidence
+   - Cross-industry cascade analysis
+   - Early warning indicator identification
+   - Similar event matching
 
-3. **Knowledge Graph** (`knowledge_graph.py`)
-   ```python
-   class KnowledgeGraph:
-       def add_event(self, event: Dict, relationships: List[Relationship]):
-           """Add event and its relationships to the graph"""
-           
-       def query_impact_path(self, from_event: str, to_effect: str):
-           """Find the causal path between two events"""
-           
-       def find_similar_patterns(self, event: Dict) -> List[Pattern]:
-           """Find historical patterns similar to current event"""
-   ```
+6. **Knowledge Graph** (`src/knowledge_graph.py`) ✅
+   - NetworkX-based graph construction
+   - Multi-type nodes (events, entities, concepts)
+   - Pattern detection (cascades, hubs, loops)
+   - Path finding with detailed explanations
+   - Interactive pyvis visualizations
+   - Graph statistics and analysis
+
+7. **CLI Tools** ✅
+   - `explore_relationships.py`: Interactive exploration
+   - `demo_relationship_discovery.py`: Showcase scenarios
+   - `visualize_chain.py`: HTML/PNG visualizations
 
 ## 🧪 Key Algorithms
 
@@ -225,19 +220,19 @@ Tech Breakthrough
           → Regional Advantages
 ```
 
-## 🔮 Advanced Features (Planned)
+## 🔮 Advanced Features
 
-### Multi-Hop Reasoning
-Connect A to D through B and C, even when A and D seem unrelated.
+### ✅ Implemented
+- **Multi-Hop Reasoning**: Connect A to D through B and C using path finding
+- **Pattern Detection**: Identify cascades, hubs, and feedback loops
+- **Timeline Prediction**: Estimate when impacts will materialize
+- **Cross-Industry Analysis**: Track effects across different sectors
 
-### Counterfactual Analysis
-"What if X hadn't happened?" - Understand critical dependencies.
-
-### Scenario Planning
-Given current events, generate likely future scenarios.
-
-### Anomaly Detection
-Identify when patterns break - often the most valuable insight.
+### 🚧 Planned
+- **Counterfactual Analysis**: "What if X hadn't happened?"
+- **Scenario Planning**: Generate likely future scenarios
+- **Anomaly Detection**: Identify when patterns break
+- **Real-time Monitoring**: Track predictions vs actual outcomes
 
 ## 📝 Development Guidelines
 
@@ -283,14 +278,26 @@ This isn't just another search engine. It's an intelligence system that:
 # Test news ingestion
 python -c "from src.news_ingestion import NewsIngestionEngine; engine = NewsIngestionEngine(); print(engine.get_recent_articles(5))"
 
-# Explore specific events
-python explore_relationships.py "Trump tariffs"
-
-# Run relationship discovery demo
+# Run interactive demo
 python demo_relationship_discovery.py
 
-# Visualize a causation chain
-python visualize_chain.py "auto tariffs" "brazilian soy exports"
+# Explore relationships
+python explore_relationships.py search "Trump tariffs"
+python explore_relationships.py relationships 1  # For article ID 1
+python explore_relationships.py chain "Trump tariffs Mexico"
+python explore_relationships.py predict 41  # Predict impacts for TSMC drought
+python explore_relationships.py ripple 1   # Show ripple effects
+python explore_relationships.py path "US auto tariffs" "Brazilian soy exports"
+python explore_relationships.py stats      # Show system statistics
+
+# Visualize causation chains
+python visualize_chain.py "auto tariffs" "brazilian soy exports" -f both
+python visualize_chain.py "Trump tariffs" --impact-web -o my_impact_web
+
+# Generate all visualizations
+for event in "Trump tariffs" "TSMC drought" "EU fines Google"; do
+    python visualize_chain.py "$event" --impact-web --depth 3
+done
 ```
 
 Remember: Every news event is connected to others. Our job is to reveal these hidden connections and help users see the complete picture.
