@@ -7,8 +7,9 @@
 Traditional search gives you what you asked for. Our AI-powered search gives you what you **need to know**.
 
 When you search for "Apple iPhone sales", we don't just find articles about iPhones - we discover:
+
 - 🏭 TSMC drought affecting chip production
-- 🚢 Port congestion delaying shipments  
+- 🚢 Port congestion delaying shipments
 - 💰 Currency fluctuations impacting revenue
 - 🏛️ EU regulations forcing changes
 - 🤖 Competitive AI developments
@@ -66,6 +67,7 @@ python demo_showcase.py
 ## 📊 Example Results
 
 ### Search: "Apple iPhone sales"
+
 ```
 Traditional search: 10 articles about iPhone sales
 Our search: 15 articles (50% improvement!)
@@ -109,6 +111,7 @@ article-relationship-engine/
 ## 🔧 Configuration
 
 Key settings in `src/config.py`:
+
 - `ENABLE_FULL_SCAN`: True (check all articles for connections)
 - `MAX_SEARCH_RESULTS`: 10 direct matches
 - `CONTEXT_SEARCH_DEPTH`: 5 contextual discoveries
@@ -150,12 +153,6 @@ This is a hackathon project built in 48 hours. Contributions welcome!
 ## 📄 License
 
 MIT License - see LICENSE file for details
-
-## 🙏 Acknowledgments
-
-- Built for [Hackathon Name] 2024
-- Powered by OpenAI and Sentence Transformers
-- FAISS by Facebook Research
 
 ---
 
