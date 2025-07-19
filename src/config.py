@@ -14,7 +14,7 @@ class Config:
     
     # Search settings
     MAX_SEARCH_RESULTS = 10
-    SIMILARITY_THRESHOLD = 0.7
+    SIMILARITY_THRESHOLD = 0.3  # Lower threshold for better matching
     CONTEXT_SEARCH_DEPTH = 5
     
     # Cache settings
