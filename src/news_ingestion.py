@@ -38,19 +38,17 @@ class NewsArticle:
 class NewsIngestionEngine:
     """Handles ingestion of news articles into the JSON storage"""
     
-    def __init__(self, news_file_path: str = "news.json", use_gpt: bool = True):
+    def __init__(self, news_file_path: str = "news.json"):
         self.news_file_path = news_file_path
         self.articles = self._load_existing_articles()
-        self.use_gpt = use_gpt
         
-        if self.use_gpt:
-            api_key = os.getenv("OPENAI_API_KEY")
-            if not api_key:
-                print("Warning: OPENAI_API_KEY not found. Falling back to basic processing.")
-                self.use_gpt = False
-            else:
-                self.client = OpenAI(api_key=api_key)
-                self.use_batch_analysis = True  # Use single API call for all analysis
+        # GPT is required - no fallback
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY is required. Please set it in your .env file.")
+        
+        self.client = OpenAI(api_key=api_key)
+        self.use_batch_analysis = True  # Use single API call for all analysis
         
     def _load_existing_articles(self) -> Dict[str, Any]:
         """Load existing articles from JSON file"""
@@ -70,7 +68,7 @@ class NewsIngestionEngine:
         max_id = max(article["id"] for article in self.articles["articles"])
         return max_id + 1
     
-    def _extract_entities_gpt(self, title: str, content: str) -> List[str]:
+    def _extract_entities(self, title: str, content: str) -> List[str]:
         """Extract named entities using GPT"""
         try:
             prompt = f"""
@@ -98,44 +96,10 @@ Return a JSON object with a single key "entities" containing a list of the most 
             return result.get("entities", [])[:10]
             
         except Exception as e:
-            print(f"GPT entity extraction failed: {e}")
-            return self._extract_entities_basic(title, content)
+            raise RuntimeError(f"GPT entity extraction failed: {e}")
     
-    def _extract_entities_basic(self, title: str, content: str) -> List[str]:
-        """Basic entity extraction without GPT"""
-        # Simple entity extraction - find capitalized words and phrases
-        text = f"{title} {content}"
-        
-        # Common patterns for entities
-        entities = set()
-        
-        # Company names and organizations
-        org_pattern = r'\b[A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*\b'
-        potential_orgs = re.findall(org_pattern, text)
-        
-        # Filter out common words
-        common_words = {'The', 'This', 'That', 'These', 'Those', 'In', 'On', 'At', 
-                       'For', 'To', 'From', 'With', 'By', 'Of', 'And', 'Or', 'But'}
-        
-        for org in potential_orgs:
-            if org not in common_words and len(org) > 2:
-                entities.add(org)
-        
-        # Add quoted entities
-        quoted_pattern = r'"([^"]+)"'
-        quoted_items = re.findall(quoted_pattern, text)
-        entities.update(quoted_items)
-        
-        return sorted(list(entities))[:10]  # Limit to 10 entities
     
-    def _extract_entities(self, title: str, content: str) -> List[str]:
-        """Extract named entities from title and content"""
-        if self.use_gpt:
-            return self._extract_entities_gpt(title, content)
-        else:
-            return self._extract_entities_basic(title, content)
-    
-    def _generate_tags_gpt(self, title: str, content: str, category: str) -> List[str]:
+    def _generate_tags(self, title: str, content: str, category: str) -> List[str]:
         """Generate tags using GPT"""
         try:
             prompt = f"""
@@ -164,45 +128,10 @@ Return a JSON object with a single key "tags" containing a list of 3-5 lowercase
             return result.get("tags", [])[:5]
             
         except Exception as e:
-            print(f"GPT tag generation failed: {e}")
-            return self._generate_tags_basic(title, content, category)
+            raise RuntimeError(f"GPT tag generation failed: {e}")
     
-    def _generate_tags_basic(self, title: str, content: str, category: str) -> List[str]:
-        """Basic tag generation without GPT"""
-        text = f"{title} {content} {category}".lower()
-        
-        # Keywords to look for
-        tag_keywords = {
-            'trade': ['trade', 'tariff', 'import', 'export'],
-            'policy': ['policy', 'regulation', 'government'],
-            'market': ['market', 'stock', 'investment', 'financial'],
-            'technology': ['technology', 'tech', 'innovation', 'digital'],
-            'manufacturing': ['manufacturing', 'production', 'factory'],
-            'supply-chain': ['supply chain', 'logistics', 'distribution'],
-            'employment': ['employment', 'jobs', 'workers', 'labor'],
-            'economic': ['economic', 'economy', 'growth'],
-            'international': ['international', 'global', 'foreign'],
-            'automotive': ['automotive', 'auto', 'vehicle', 'car'],
-            'mexico': ['mexico', 'mexican'],
-            'china': ['china', 'chinese'],
-            'agriculture': ['agriculture', 'farming', 'crops']
-        }
-        
-        tags = []
-        for tag, keywords in tag_keywords.items():
-            if any(keyword in text for keyword in keywords):
-                tags.append(tag)
-        
-        return tags[:5]  # Limit to 5 tags
     
-    def _generate_tags(self, title: str, content: str, category: str) -> List[str]:
-        """Generate relevant tags for the article"""
-        if self.use_gpt:
-            return self._generate_tags_gpt(title, content, category)
-        else:
-            return self._generate_tags_basic(title, content, category)
-    
-    def _analyze_sentiment_gpt(self, title: str, content: str) -> str:
+    def _analyze_sentiment(self, title: str, content: str) -> str:
         """Analyze sentiment using GPT"""
         try:
             prompt = f"""
@@ -240,37 +169,10 @@ If the sentiment is clearly mixed, return "neutral".
             return sentiment
             
         except Exception as e:
-            print(f"GPT sentiment analysis failed: {e}")
-            return self._analyze_sentiment_basic(title, content)
+            raise RuntimeError(f"GPT sentiment analysis failed: {e}")
     
-    def _analyze_sentiment_basic(self, title: str, content: str) -> str:
-        """Basic sentiment analysis without GPT"""
-        text = f"{title} {content}".lower()
-        
-        # Simple sentiment analysis based on keywords
-        positive_words = ['growth', 'increase', 'surge', 'expand', 'improve', 'gain', 
-                         'positive', 'optimistic', 'opportunity', 'benefit']
-        negative_words = ['decline', 'fall', 'drop', 'concern', 'warning', 'threat',
-                         'negative', 'pessimistic', 'risk', 'loss', 'plunge']
-        
-        positive_count = sum(1 for word in positive_words if word in text)
-        negative_count = sum(1 for word in negative_words if word in text)
-        
-        if positive_count > negative_count + 2:
-            return "positive"
-        elif negative_count > positive_count + 2:
-            return "negative"
-        else:
-            return "neutral"
     
-    def _analyze_sentiment(self, title: str, content: str) -> str:
-        """Analyze sentiment of the article"""
-        if self.use_gpt:
-            return self._analyze_sentiment_gpt(title, content)
-        else:
-            return self._analyze_sentiment_basic(title, content)
-    
-    def _calculate_impact_score_gpt(self, title: str, content: str, category: str) -> float:
+    def _calculate_impact_score(self, title: str, content: str, category: str) -> float:
         """Calculate impact score using GPT"""
         try:
             prompt = f"""
@@ -312,36 +214,8 @@ Guidelines:
             return min(max(score, 1.0), 10.0)
             
         except Exception as e:
-            print(f"GPT impact scoring failed: {e}")
-            return self._calculate_impact_score_basic(title, content, category)
+            raise RuntimeError(f"GPT impact scoring failed: {e}")
     
-    def _calculate_impact_score_basic(self, title: str, content: str, category: str) -> float:
-        """Basic impact score calculation without GPT"""
-        score = 5.0  # Base score
-        
-        # Adjust based on category
-        high_impact_categories = ['Politics', 'Finance', 'International', 'Economics']
-        if category in high_impact_categories:
-            score += 1.5
-        
-        # Adjust based on keywords
-        high_impact_keywords = ['billion', 'million', 'percent', 'crisis', 'major',
-                               'significant', 'emergency', 'breaking']
-        text = f"{title} {content}".lower()
-        
-        for keyword in high_impact_keywords:
-            if keyword in text:
-                score += 0.5
-        
-        # Cap the score
-        return min(max(score, 3.0), 10.0)
-    
-    def _calculate_impact_score(self, title: str, content: str, category: str) -> float:
-        """Calculate impact score based on various factors"""
-        if self.use_gpt:
-            return self._calculate_impact_score_gpt(title, content, category)
-        else:
-            return self._calculate_impact_score_basic(title, content, category)
     
     def _comprehensive_analysis_gpt(self, title: str, content: str, category: str) -> Dict[str, Any]:
         """Perform comprehensive analysis in a single GPT call"""
@@ -387,15 +261,7 @@ Return a JSON object with:
             }
             
         except Exception as e:
-            print(f"GPT comprehensive analysis failed: {e}")
-            # Fall back to individual methods
-            return {
-                "entities": self._extract_entities_basic(title, content),
-                "tags": self._generate_tags_basic(title, content, category),
-                "sentiment": self._analyze_sentiment_basic(title, content),
-                "impact_score": self._calculate_impact_score_basic(title, content, category),
-                "summary": ""
-            }
+            raise RuntimeError(f"GPT comprehensive analysis failed: {e}")
     
     def ingest_article(self, 
                       title: str,
@@ -428,33 +294,19 @@ Return a JSON object with:
         if timestamp is None:
             timestamp = datetime.now(timezone.utc).isoformat()
         
-        # If using GPT and batch analysis, get all fields at once
-        if self.use_gpt and hasattr(self, 'use_batch_analysis') and self.use_batch_analysis:
-            if entities is None or tags is None or sentiment is None or impact_score is None:
-                analysis = self._comprehensive_analysis_gpt(title, content, category)
-                
-                # Use analysis results for any missing fields
-                if entities is None:
-                    entities = analysis["entities"]
-                if tags is None:
-                    tags = analysis["tags"]
-                if sentiment is None:
-                    sentiment = analysis["sentiment"]
-                if impact_score is None:
-                    impact_score = analysis["impact_score"]
-        else:
-            # Auto-generate missing fields individually
+        # Use batch analysis to get all fields at once for efficiency
+        if entities is None or tags is None or sentiment is None or impact_score is None:
+            analysis = self._comprehensive_analysis_gpt(title, content, category)
+            
+            # Use analysis results for any missing fields
             if entities is None:
-                entities = self._extract_entities(title, content)
-            
+                entities = analysis["entities"]
             if tags is None:
-                tags = self._generate_tags(title, content, category)
-            
+                tags = analysis["tags"]
             if sentiment is None:
-                sentiment = self._analyze_sentiment(title, content)
-            
+                sentiment = analysis["sentiment"]
             if impact_score is None:
-                impact_score = self._calculate_impact_score(title, content, category)
+                impact_score = analysis["impact_score"]
         
         # Create article object
         article = NewsArticle(
@@ -515,23 +367,20 @@ Return a JSON object with:
 
 
 class NewsAPIConnector:
-    """Connector for external news APIs with category detection"""
+    """Connector for external news APIs with GPT-powered category detection"""
     
-    def __init__(self, api_key: Optional[str] = None, use_gpt_categorization: bool = True):
+    def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key
-        self.use_gpt_categorization = use_gpt_categorization
         
-        if self.use_gpt_categorization:
-            openai_key = os.getenv("OPENAI_API_KEY")
-            if openai_key:
-                self.client = OpenAI(api_key=openai_key)
-            else:
-                self.use_gpt_categorization = False
+        # GPT is required for categorization
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if not openai_key:
+            raise ValueError("OPENAI_API_KEY is required for NewsAPIConnector")
+        
+        self.client = OpenAI(api_key=openai_key)
     
     def _detect_category(self, title: str, content: str) -> str:
         """Detect category using GPT"""
-        if not self.use_gpt_categorization:
-            return self._detect_category_basic(title, content)
         
         try:
             prompt = f"""
@@ -575,30 +424,8 @@ Return a JSON object with:
             return result.get("category", "Business")
             
         except Exception as e:
-            print(f"GPT categorization failed: {e}")
-            return self._detect_category_basic(title, content)
+            raise RuntimeError(f"GPT categorization failed: {e}")
     
-    def _detect_category_basic(self, title: str, content: str) -> str:
-        """Basic category detection without GPT"""
-        text = f"{title} {content}".lower()
-        
-        category_keywords = {
-            'Politics': ['government', 'president', 'congress', 'senate', 'policy', 'election'],
-            'Finance': ['market', 'stock', 'bank', 'investment', 'financial', 'economy'],
-            'Technology': ['tech', 'software', 'ai', 'digital', 'cyber', 'innovation'],
-            'Business': ['company', 'ceo', 'merger', 'acquisition', 'revenue', 'profit'],
-            'International': ['global', 'international', 'foreign', 'trade', 'export'],
-            'Environment': ['climate', 'environment', 'carbon', 'renewable', 'pollution'],
-            'Healthcare': ['health', 'medical', 'hospital', 'vaccine', 'disease', 'drug']
-        }
-        
-        scores = {}
-        for category, keywords in category_keywords.items():
-            scores[category] = sum(1 for keyword in keywords if keyword in text)
-        
-        if scores:
-            return max(scores, key=scores.get)
-        return "Business"  # Default category
     
     def fetch_latest_news(self) -> List[Dict[str, Any]]:
         """

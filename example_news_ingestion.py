@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize the ingestion engine
-# It will automatically use GPT if OPENAI_API_KEY is set
-engine = NewsIngestionEngine("news.json", use_gpt=True)
+# GPT is required - will raise error if OPENAI_API_KEY is not set
+engine = NewsIngestionEngine("news.json")
 
 # Example 1: Ingest a single article (GPT will analyze it automatically)
 print("Example 1: Ingesting a single article with GPT analysis")
@@ -42,8 +42,8 @@ print()
 print("Example 2: Auto-categorization with GPT")
 print("-" * 50)
 
-# Initialize API connector with GPT categorization
-api_connector = NewsAPIConnector(use_gpt_categorization=True)
+# Initialize API connector (GPT categorization is required)
+api_connector = NewsAPIConnector()
 
 # Simulate incoming news without category
 raw_news = {

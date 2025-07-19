@@ -1,8 +1,8 @@
-# News Ingestion System with GPT Integration
+# News Ingestion System (GPT-Powered)
 
 ## Overview
 
-The news ingestion system automatically processes incoming news articles and adds them to `news.json` with intelligent analysis powered by GPT-3.5.
+The news ingestion system automatically processes incoming news articles and adds them to `news.json` with intelligent analysis powered by GPT-3.5. **GPT is required - there is no fallback mechanism.**
 
 ## Features
 
@@ -39,7 +39,7 @@ Each article is stored with:
 # Ensure you have the required dependencies
 pip install openai python-dotenv
 
-# Set your OpenAI API key
+# Set your OpenAI API key (REQUIRED - system will not work without it)
 echo "OPENAI_API_KEY=your_key_here" > .env
 ```
 
@@ -48,7 +48,7 @@ echo "OPENAI_API_KEY=your_key_here" > .env
 ```python
 from src.news_ingestion import NewsIngestionEngine
 
-# Initialize engine (automatically uses GPT if API key is available)
+# Initialize engine (requires OPENAI_API_KEY)
 engine = NewsIngestionEngine("news.json")
 
 # Ingest a single article
@@ -110,14 +110,9 @@ When using GPT, the system makes a single comprehensive API call to analyze:
 
 This reduces API costs and improves performance.
 
-### Fallback Mechanism
+### No Fallback Mechanism
 
-If GPT is unavailable or fails, the system automatically falls back to rule-based analysis for:
-
-- Basic entity extraction (capitalized phrases)
-- Keyword-based tagging
-- Simple sentiment analysis
-- Category-based impact scoring
+This system requires GPT to function. If the OpenAI API is unavailable or fails, the system will raise an error. This ensures consistent, high-quality analysis for all articles.
 
 ### Cost Considerations
 
@@ -159,10 +154,10 @@ See `example_news_ingestion.py` for complete examples of:
 
 The system includes robust error handling:
 
-- Automatic fallback if GPT fails
+- Raises clear errors if GPT fails (no silent failures)
 - Validation of all fields
-- Duplicate detection by content hash
-- Graceful handling of malformed data
+- Clear error messages for debugging
+- No fallback - ensures quality consistency
 
 ## Future Enhancements
 
@@ -195,4 +190,4 @@ Potential additions:
 
 - Reduce content length sent to GPT
 - Cache analysis results
-- Use fallback for low-priority news
+- Consider batching articles for processing
