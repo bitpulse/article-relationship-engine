@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 import diskcache
 
 from config import Config
+from faiss_index import FAISSIndexManager
 
 class ContextualSearchEngine:
     def __init__(self):
@@ -15,22 +16,27 @@ class ContextualSearchEngine:
         self.encoder = SentenceTransformer(Config.EMBEDDING_MODEL)
         self.cache = diskcache.Cache(Config.CACHE_DIR)
         
-        # Store articles in memory for now
-        self.articles = []
-        self.article_embeddings = None
+        # Store articles in memory
+        self.articles = {}
+        self.article_list = []
+        
+        # Initialize FAISS index
+        self.faiss_index = FAISSIndexManager(dimension=384)
         
     def add_articles(self, articles: List[Dict[str, Any]]):
-        """Add articles to the search engine"""
-        self.articles = articles
+        """Add articles to the search engine with FAISS indexing"""
+        self.article_list = articles
+        
+        # Create article lookup dict
+        self.articles = {art['id']: art for art in articles}
         
         # Generate embeddings for all articles
         texts = [f"{art['title']} {art.get('content', '')[:500]}" for art in articles]
-        self.article_embeddings = self.encoder.encode(texts, show_progress_bar=True)
+        embeddings = self.encoder.encode(texts, show_progress_bar=True)
         
-        # Normalize embeddings
-        self.article_embeddings = self.article_embeddings / np.linalg.norm(
-            self.article_embeddings, axis=1, keepdims=True
-        )
+        # Add to FAISS index (normalization handled by FAISSIndexManager)
+        article_ids = [art['id'] for art in articles]
+        self.faiss_index.add_embeddings(embeddings, article_ids)
         
     def search(self, query: str) -> Dict[str, Any]:
         """Enhanced search that finds context"""
@@ -114,28 +120,27 @@ class ContextualSearchEngine:
             }
     
     def _find_direct_matches(self, query: str) -> List[Dict[str, Any]]:
-        """Find articles that directly match the query"""
+        """Find articles that directly match the query using FAISS"""
         
         if not self.articles:
             return []
         
         # Generate query embedding
-        query_embedding = self.encoder.encode([query])
-        query_embedding = query_embedding / np.linalg.norm(query_embedding)
+        query_embedding = self.encoder.encode(query)
         
-        # Calculate similarities
-        similarities = np.dot(self.article_embeddings, query_embedding.T).flatten()
-        
-        # Get top matches
-        top_indices = np.argsort(similarities)[::-1][:Config.MAX_SEARCH_RESULTS]
+        # Search using FAISS
+        search_results = self.faiss_index.search(
+            query_embedding, 
+            k=Config.MAX_SEARCH_RESULTS,
+            similarity_threshold=Config.SIMILARITY_THRESHOLD
+        )
         
         results = []
-        for idx in top_indices:
-            if similarities[idx] > Config.SIMILARITY_THRESHOLD:
-                article = self.articles[idx].copy()
-                article['relevance_score'] = float(similarities[idx])
-                article['match_type'] = 'direct'
-                results.append(article)
+        for article_id, score in search_results:
+            article = self.articles[article_id].copy()
+            article['relevance_score'] = score
+            article['match_type'] = 'direct'
+            results.append(article)
         
         return results
     
@@ -154,34 +159,61 @@ class ContextualSearchEngine:
         contextual_articles = []
         seen_ids = {art.get('id', art.get('url', '')) for art in direct_results}
         
-        for expanded_query in expanded_queries[1:]:  # Skip original query
-            # Search with expanded terms
-            exp_embedding = self.encoder.encode([expanded_query])
-            exp_embedding = exp_embedding / np.linalg.norm(exp_embedding)
-            
-            similarities = np.dot(self.article_embeddings, exp_embedding.T).flatten()
-            top_indices = np.argsort(similarities)[::-1][:5]
-            
-            for idx in top_indices:
-                article = self.articles[idx]
-                article_id = article.get('id', article.get('url', ''))
+        # Full scan mode: Check ALL articles for contextual relevance
+        if Config.ENABLE_FULL_SCAN:
+            # Process articles in batches for efficiency
+            batch_size = 5
+            for i in range(0, len(self.article_list), batch_size):
+                batch = self.article_list[i:i+batch_size]
                 
-                if article_id not in seen_ids and similarities[idx] > 0.6:
-                    # Use GPT to verify relevance
-                    relevance = self._check_contextual_relevance(
-                        query, 
-                        article,
-                        understanding
-                    )
+                for article in batch:
+                    article_id = article.get('id', article.get('url', ''))
                     
-                    if relevance['is_relevant']:
-                        article_copy = article.copy()
-                        article_copy['relevance_score'] = float(similarities[idx])
-                        article_copy['match_type'] = 'contextual'
-                        article_copy['context_explanation'] = relevance['explanation']
-                        article_copy['impact_level'] = relevance['impact']
-                        contextual_articles.append(article_copy)
-                        seen_ids.add(article_id)
+                    if article_id not in seen_ids:
+                        # Use GPT to check contextual relevance
+                        relevance = self._check_contextual_relevance(
+                            query, 
+                            article,
+                            understanding
+                        )
+                        
+                        if relevance['is_relevant']:
+                            article_copy = article.copy()
+                            # Get similarity score for ranking
+                            article_embedding = self.faiss_index.get_embedding(article_id)
+                            query_embedding = self.encoder.encode(query)
+                            similarity = np.dot(article_embedding, query_embedding) if article_embedding is not None else 0.5
+                            
+                            article_copy['relevance_score'] = float(similarity)
+                            article_copy['match_type'] = 'contextual'
+                            article_copy['context_explanation'] = relevance['explanation']
+                            article_copy['impact_level'] = relevance['impact']
+                            article_copy['confidence'] = relevance.get('confidence', 0.7)
+                            contextual_articles.append(article_copy)
+                            seen_ids.add(article_id)
+        else:
+            # Original expansion-based search using FAISS
+            for expanded_query in expanded_queries[1:]:  # Skip original query
+                exp_embedding = self.encoder.encode(expanded_query)
+                search_results = self.faiss_index.search(exp_embedding, k=5)
+                
+                for article_id, score in search_results:
+                    if article_id not in seen_ids and score > 0.6:
+                        article = self.articles[article_id]
+                        relevance = self._check_contextual_relevance(
+                            query, 
+                            article,
+                            understanding
+                        )
+                        
+                        if relevance['is_relevant']:
+                            article_copy = article.copy()
+                            article_copy['relevance_score'] = score
+                            article_copy['match_type'] = 'contextual'
+                            article_copy['context_explanation'] = relevance['explanation']
+                            article_copy['impact_level'] = relevance['impact']
+                            contextual_articles.append(article_copy)
+                            seen_ids.add(article_id)
         
         # Sort by relevance and impact
         contextual_articles.sort(
@@ -212,14 +244,21 @@ class ContextualSearchEngine:
         Preview: {article.get('content', '')[:200]}
         
         Does this article provide important context for the original search?
-        Consider: hidden factors, supply chain impacts, regulatory changes, competitive dynamics, market conditions.
+        Consider these connection types:
+        - Supply chain: Does this affect production, sourcing, or logistics?  
+        - Regulatory: Legal/compliance impacts?
+        - Competitive: Market dynamics or competitor actions?
+        - Financial: Revenue, costs, or market impacts?
+        - Technological: Dependencies or innovations?
+        - Geopolitical: Trade, sanctions, or international relations?
         
         Return JSON:
         {{
             "is_relevant": true/false,
             "explanation": "one sentence explaining the connection",
             "impact": "high/medium/low",
-            "connection_type": "causal/competitive/regulatory/market/supply_chain/other"
+            "connection_type": "supply_chain/regulatory/competitive/financial/technological/geopolitical/other",
+            "confidence": 0.0-1.0
         }}
         """
         

@@ -16,6 +16,7 @@ class Config:
     MAX_SEARCH_RESULTS = 10
     SIMILARITY_THRESHOLD = 0.3  # Lower threshold for better matching
     CONTEXT_SEARCH_DEPTH = 5
+    ENABLE_FULL_SCAN = True  # Enable full article scan for contextual discovery
     
     # Cache settings
     CACHE_DIR = "./cache"

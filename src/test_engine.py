@@ -12,30 +12,39 @@ def test_basic_search():
     # Initialize engine
     engine = ContextualSearchEngine()
     
-    # Add test articles
-    test_articles = [
-        {
-            "id": "1",
-            "title": "Apple Reports Record iPhone Sales in Q4",
-            "content": "Apple Inc. announced record-breaking iPhone sales for the fourth quarter, driven by strong demand for the iPhone 15 Pro models. Revenue exceeded analyst expectations by 8%.",
-            "date": "2024-01-15",
-            "source": "TechCrunch"
-        },
-        {
-            "id": "2",
-            "title": "TSMC Faces Production Delays Due to Taiwan Drought",
-            "content": "Taiwan Semiconductor Manufacturing Company warns of potential production delays as severe drought conditions affect water supply to fabrication plants. The company produces chips for major tech firms including Apple.",
-            "date": "2024-01-14",
-            "source": "Reuters"
-        },
-        {
-            "id": "3",
-            "title": "Samsung Gains Smartphone Market Share",
-            "content": "Samsung Electronics reported increased smartphone market share in Q4, capitalizing on strong Galaxy S23 sales and competitive pricing in emerging markets.",
-            "date": "2024-01-13",
-            "source": "Bloomberg"
-        }
-    ]
+    # Load dummy articles from JSON file
+    import os
+    json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'dummy_articles.json')
+    
+    if os.path.exists(json_path):
+        with open(json_path, 'r') as f:
+            test_articles = json.load(f)
+        print(f"Loaded {len(test_articles)} articles from dummy dataset")
+    else:
+        # Fallback to basic test articles
+        test_articles = [
+            {
+                "id": "1",
+                "title": "Apple Reports Record iPhone Sales in Q4",
+                "content": "Apple Inc. announced record-breaking iPhone sales for the fourth quarter, driven by strong demand for the iPhone 15 Pro models. Revenue exceeded analyst expectations by 8%.",
+                "date": "2024-01-15",
+                "source": "TechCrunch"
+            },
+            {
+                "id": "2",
+                "title": "TSMC Faces Production Delays Due to Taiwan Drought",
+                "content": "Taiwan Semiconductor Manufacturing Company warns of potential production delays as severe drought conditions affect water supply to fabrication plants. The company produces chips for major tech firms including Apple.",
+                "date": "2024-01-14",
+                "source": "Reuters"
+            },
+            {
+                "id": "3",
+                "title": "Samsung Gains Smartphone Market Share",
+                "content": "Samsung Electronics reported increased smartphone market share in Q4, capitalizing on strong Galaxy S23 sales and competitive pricing in emerging markets.",
+                "date": "2024-01-13",
+                "source": "Bloomberg"
+            }
+        ]
     
     engine.add_articles(test_articles)
     
