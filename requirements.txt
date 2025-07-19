@@ -1,0 +1,16 @@
+# Core dependencies
+openai>=1.0.0
+sentence-transformers>=2.2.0
+numpy>=1.24.0
+python-dotenv>=1.0.0
+diskcache>=5.6.0
+
+# Optional - for full implementation
+streamlit>=1.31.0
+plotly>=5.18.0
+networkx>=3.2
+newsapi-python>=0.2.6
+faiss-cpu>=1.7.4
+
+# Development dependencies
+pytest>=7.4.0
