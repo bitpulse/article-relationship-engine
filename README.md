@@ -125,26 +125,15 @@ cp .env.example .env
 ## Quick Start
 
 ```bash
-# Run the AI search improvement demo (perfect for presentations)
-python demo_ai_search_fast.py
-
 # Launch the interactive Streamlit UI
-streamlit run app_ai_search.py
-
-# Run the full interactive demo
-python demo_relationship_discovery.py
-
-# Explore specific events and their hidden connections
-python explore_relationships.py search "Trump tariffs"
-python explore_relationships.py chain "Trump tariffs Mexico"
-python explore_relationships.py predict 1  # Predict impacts for article ID 1
-
-# Visualize causation chains
-python visualize_chain.py "US auto tariffs" "Brazilian soy exports"
-
-# Create an impact web visualization
-python visualize_chain.py "Trump tariffs" --impact-web --depth 3
+streamlit run app.py
 ```
+
+The app provides:
+- Live demonstration of AI-powered vs traditional search
+- Browse all 292 news articles with advanced filtering
+- Analytics and visualizations of the dataset
+- Interactive relationship discovery examples
 
 ## Adding New Articles to the System
 
