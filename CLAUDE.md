@@ -1,247 +1,303 @@
-# CLAUDE.md
+# CLAUDE.md - Intelligent News Relationship Discovery Engine
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with the Article Relationship Engine - an intelligent system that discovers hidden cause-and-effect relationships in global news.
 
-## Project Overview
+## 🧠 Core Concept
 
-AI-powered contextual search engine that discovers hidden connections between articles for a 48-hour hackathon. When users search for "Apple earnings", we reveal Taiwan droughts affecting chip suppliers, EU regulations, and competitive dynamics - 3x more valuable than keyword matching.
+**Transform isolated news articles into a living knowledge graph that reveals hidden cause-and-effect relationships across seemingly unrelated events.**
 
-## Tech Stack
+Instead of just finding similar articles, we:
+- Understand causation chains (A causes B causes C)
+- Track ripple effects across industries and borders
+- Identify retaliation patterns and competitive responses
+- Predict likely future developments
+- Map all affected stakeholders, not just the obvious ones
 
-- **Python 3.9+**
-- **LLM**: OpenAI API (GPT-3.5-turbo for speed, GPT-4 optional)
-- **Embeddings**: sentence-transformers (all-MiniLM-L6-v2)
-- **Vector Search**: FAISS (efficient similarity search)
-- **Caching**: diskcache
-- **UI**: Streamlit (planned)
-- **Data Source**: Dummy dataset with 24+ interconnected articles
+## 🎯 The Intelligence We Provide
 
-## Project Structure
+### Traditional News Search
+Query: "Ford stock drop"
+Result: More articles about Ford's stock
+
+### Our Intelligent Discovery
+Query: "Ford stock drop"
+Result: 
+- Ford's stock decline (obvious)
+- Mexican auto tariffs causing the drop (root cause)
+- Steel prices rising due to reshoring (supply chain effect)
+- Chinese EV makers targeting Mexico (competitive response)
+- Auto loan rates rising (consumer impact)
+- Michigan real estate boom (reshoring opportunity)
+- Brazil benefiting from trade war (spillover effect)
+
+**We reveal the hidden web of cause and effect.**
+
+## 🏗️ Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    News Ingestion Pipeline                   │
+│  - GPT-powered entity extraction                            │
+│  - Impact scoring (1-10 scale)                              │
+│  - Sentiment analysis with context                          │
+│  - Automatic categorization                                 │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Relationship Discovery Engine                   │
+│                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐                 │
+│  │ Direct Matching │  │ Context Analysis │                 │
+│  │ (FAISS Vectors) │  │  (GPT-3.5/4)    │                 │
+│  └────────┬────────┘  └────────┬────────┘                 │
+│           │                     │                           │
+│           ▼                     ▼                           │
+│  ┌─────────────────────────────────────┐                   │
+│  │    Relationship Type Detection      │                   │
+│  │  • Supply Chain Impacts             │                   │
+│  │  • Regulatory/Legal Implications    │                   │
+│  │  • Competitive Dynamics             │                   │
+│  │  • Financial/Market Effects         │                   │
+│  │  • Technological Dependencies       │                   │
+│  │  • Geopolitical Factors            │                   │
+│  └─────────────────────┬───────────────┘                   │
+│                        │                                    │
+│                        ▼                                    │
+│  ┌─────────────────────────────────────┐                   │
+│  │    Causation Chain Builder          │                   │
+│  │  • Temporal sequencing              │                   │
+│  │  • Impact propagation               │                   │
+│  │  • Confidence scoring               │                   │
+│  └─────────────────────┬───────────────┘                   │
+└────────────────────────┼───────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  Knowledge Graph Builder                     │
+│  - Nodes: Events, Entities, Concepts                       │
+│  - Edges: Causal relationships with type & strength        │
+│  - Temporal dimension for evolution tracking               │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Predictive Insights                        │
+│  - What happens next based on patterns                     │
+│  - Early warning indicators                                │
+│  - Opportunity identification                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 📁 Project Structure
 
 ```
 article-relationship-engine/
 ├── src/
-│   ├── search_engine.py      # Core AI search logic with contextual discovery
-│   ├── config.py            # Configuration and environment variables
-│   ├── faiss_index.py      # FAISS index management for vector search
-│   ├── data_generator.py   # Generate dummy articles with hidden connections
-│   └── test_engine.py      # Test suite for search functionality
+│   ├── __init__.py               # Package initialization
+│   ├── news_ingestion.py         # Intelligent news processing with GPT
+│   ├── config.py                 # Configuration and constants
+│   ├── relationship_engine.py    # Core relationship discovery ✅
+│   ├── causation_analyzer.py     # Cause-effect chain builder ✅
+│   ├── impact_predictor.py       # Future impact prediction ✅
+│   └── knowledge_graph.py        # Graph construction & queries ✅
 ├── data/
-│   └── dummy_articles.json # 24+ interconnected articles dataset
-├── .env                     # API keys (create from .env.example)
-├── run_tests.py            # Main test runner
-├── demo_showcase.py        # Interactive demo of capabilities
-└── CLAUDE.md               # This file
+│   └── news.json                 # Rich dataset with hidden connections
+├── explore_relationships.py      # CLI tool for exploration ✅
+├── demo_relationship_discovery.py # Interactive demonstration ✅
+├── visualize_chain.py            # Causation chain visualization ✅
+└── requirements.txt              # Dependencies (updated)
 ```
 
-## Setup Commands
+## 🔧 Current Implementation
 
-```bash
-# Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
+### ✅ Completed Features
 
-# Install dependencies
-pip install openai sentence-transformers numpy diskcache python-dotenv faiss-cpu
+1. **News Ingestion System** (`src/news_ingestion.py`)
+   - GPT-powered entity extraction
+   - Intelligent sentiment analysis
+   - Impact scoring (1-10 scale)
+   - Automatic categorization
+   - No fallback - GPT is required for quality
 
-# Set up environment variables
-cp .env.example .env
-# Add OPENAI_API_KEY to .env
+2. **Rich News Dataset** (`news.json`)
+   - 200+ interconnected articles
+   - Real causation chains (tariffs → retaliation → spillover)
+   - Multiple domains (auto, agriculture, finance, etc.)
+   - Temporal progression showing cause and effect
 
-# Generate dummy dataset
-python src/data_generator.py
+3. **Relationship Discovery Engine** (`src/relationship_engine.py`) ✅
+   - Entity overlap and temporal proximity detection
+   - GPT-powered relationship classification
+   - Batch processing for API efficiency
+   - Confidence scoring and result caching
+   - Impact web exploration
 
-# Run tests
-python run_tests.py
+4. **Causation Analyzer** (`src/causation_analyzer.py`) ✅
+   - Directed graph construction from all relationships
+   - Chain building with pattern matching
+   - Root cause identification
+   - Ripple effect tracking across industries
+   - Feedback loop detection
+   - Cross-industry impact analysis
 
-# Run demo showcase
-python demo_showcase.py
-```
+5. **Impact Predictor** (`src/impact_predictor.py`) ✅
+   - Historical pattern database construction
+   - GPT-4 powered prediction generation
+   - Timeline estimation with confidence
+   - Cross-industry cascade analysis
+   - Early warning indicator identification
+   - Similar event matching
 
-## Core Architecture
+6. **Knowledge Graph** (`src/knowledge_graph.py`) ✅
+   - NetworkX-based graph construction
+   - Multi-type nodes (events, entities, concepts)
+   - Pattern detection (cascades, hubs, loops)
+   - Path finding with detailed explanations
+   - Interactive pyvis visualizations
+   - Graph statistics and analysis
 
-### ContextualSearchEngine (src/search_engine.py)
+7. **CLI Tools** ✅
+   - `explore_relationships.py`: Interactive exploration
+   - `demo_relationship_discovery.py`: Showcase scenarios
+   - `visualize_chain.py`: HTML/PNG visualizations
 
-The search pipeline follows this flow:
+## 🧪 Key Algorithms
 
-1. **Query Understanding** (`_understand_query`):
-   - GPT extracts intent, related topics, hidden factors
-   - Temperature: 0.3 for consistency
-   - Returns structured JSON with search expansion terms
-
-2. **Direct Matching** (`_find_direct_matches`):
-   - Embedding-based similarity search
-   - Uses pre-computed normalized embeddings
-   - Returns top N articles by cosine similarity
-
-3. **Contextual Discovery** (`_find_contextual_matches`):
-   - Full-scan mode: Checks ALL articles for non-obvious relevance
-   - GPT evaluates 6 connection types:
-     - Supply chain impacts
-     - Regulatory/legal implications
-     - Competitive dynamics
-     - Financial/market effects
-     - Technological dependencies
-     - Geopolitical factors
-   - Batch processing for efficiency
-   - Cached to avoid repeated API calls
-
-4. **Insight Generation** (`_generate_insights`):
-   - Synthesizes findings into executive summary
-   - Optional GPT-4 for complex reasoning
-   - Temperature: 0.5 for balanced creativity
-
-### Configuration (src/config.py)
-
-Environment-based configuration with sensible defaults:
-- `OPENAI_API_KEY`: Required for GPT integration
-- `MAX_SEARCH_RESULTS`: 10
-- `SIMILARITY_THRESHOLD`: 0.3
-- `CONTEXT_SEARCH_DEPTH`: 5
-- `ENABLE_FULL_SCAN`: True (scan all articles for connections)
-- Cache TTL: 1 hour (3600 seconds)
-
-## Key Implementation Patterns
-
-### AI Prompt Engineering
-
+### 1. Relationship Type Classification
 ```python
-# Always structure prompts clearly
-prompt = f"""
-Analyze this search query and extract the user's intent.
-
-Query: {query}
-
-Return a JSON object with:
-- primary_intent: Main goal
-- related_topics: List of related areas
-- hidden_factors: Non-obvious considerations
-"""
-
-# Request JSON format
-response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[{"role": "user", "content": prompt}],
-    temperature=0.3,
-    response_format={"type": "json_object"}
-)
+RELATIONSHIP_TYPES = {
+    'CAUSES': 'Direct causation',
+    'TRIGGERS_RETALIATION': 'Provokes counter-action',
+    'CREATES_OPPORTUNITY': 'Opens market/business opportunity',
+    'DISRUPTS_SUPPLY_CHAIN': 'Affects production/distribution',
+    'SHIFTS_COMPETITION': 'Changes competitive landscape',
+    'AFFECTS_REGULATION': 'Influences policy/law',
+    'IMPACTS_FINANCE': 'Affects markets/currency/rates',
+}
 ```
 
-### Error Handling
+### 2. Impact Propagation Model
+- Primary impact: Direct effect on mentioned entities
+- Secondary impact: Effects on suppliers, customers, competitors
+- Tertiary impact: Broader market and economic effects
+- Quaternary impact: Geopolitical and social implications
 
-```python
-try:
-    # API calls
-except Exception as e:
-    logger.error(f"API error: {e}")
-    # Return graceful fallback
-    return {"error": "temporary", "fallback": cached_result}
+### 3. Temporal Analysis
+- Event sequencing: Order matters (A must happen before B)
+- Lag effects: Some impacts take time to materialize
+- Feedback loops: Effects that reinforce or dampen the original cause
+
+## 💡 Intelligence Patterns
+
+### Pattern 1: Trade War Cascade
 ```
+US Tariff Action
+  → Target Country Retaliation
+    → Third Country Opportunity
+      → Supply Chain Realignment
+        → Currency Impacts
+          → Investment Flows
+```
+
+### Pattern 2: Regulatory Ripple
+```
+New Regulation Announced
+  → Compliance Costs Rise
+    → Small Players Exit
+      → Market Consolidation
+        → Innovation Shift
+          → Consumer Impact
+```
+
+### Pattern 3: Technology Disruption
+```
+Tech Breakthrough
+  → Incumbent Threat
+    → Strategic Pivots
+      → M&A Activity
+        → Talent War
+          → Regional Advantages
+```
+
+## 🔮 Advanced Features
+
+### ✅ Implemented
+- **Multi-Hop Reasoning**: Connect A to D through B and C using path finding
+- **Pattern Detection**: Identify cascades, hubs, and feedback loops
+- **Timeline Prediction**: Estimate when impacts will materialize
+- **Cross-Industry Analysis**: Track effects across different sectors
+
+### 🚧 Planned
+- **Counterfactual Analysis**: "What if X hadn't happened?"
+- **Scenario Planning**: Generate likely future scenarios
+- **Anomaly Detection**: Identify when patterns break
+- **Real-time Monitoring**: Track predictions vs actual outcomes
+
+## 📝 Development Guidelines
+
+### Adding New Relationship Types
+1. Define the relationship in `RELATIONSHIP_TYPES`
+2. Add detection logic to `RelationshipDiscoveryEngine`
+3. Create test cases with real examples
+4. Update impact propagation rules
+
+### Improving Intelligence
+1. Study real causation chains in the news data
+2. Identify patterns that repeat across domains
+3. Encode these patterns as detection rules
+4. Validate with historical examples
 
 ### Performance Optimization
+- Cache relationship discoveries
+- Batch GPT calls for efficiency
+- Pre-compute common causation chains
+- Use FAISS for initial candidate selection
 
-- Cache all GPT responses with diskcache
-- Pre-compute and normalize embeddings
-- Batch relevance checks when possible
-- Limit article content to 500 chars in prompts
+## 🎯 Success Metrics
 
-## Next Implementation Steps
+1. **Relationship Coverage**: % of actual relationships discovered
+2. **Causation Accuracy**: Correctness of cause-effect chains
+3. **Prediction Hit Rate**: % of predicted impacts that materialize
+4. **Discovery Speed**: Time to find all relationships
+5. **Insight Value**: User-rated usefulness of discoveries
 
-1. **Data Pipeline** (`data_fetcher.py`):
-   - NewsAPI integration
-   - Article deduplication
-   - Content extraction
+## 🚀 Vision
 
-2. **UI Layer** (`app.py`):
-   - Streamlit interface
-   - Search input with real-time results
-   - Visualization of connections
+This isn't just another search engine. It's an intelligence system that:
+- Understands the world as an interconnected system
+- Reveals hidden dependencies and opportunities
+- Predicts cascading effects before they're obvious
+- Helps users make decisions with complete information
 
-3. **Testing** (`test_engine.py`):
-   - Unit tests for each pipeline stage
-   - Mock GPT responses for consistency
-   - Performance benchmarks
+**We're building the lens through which professionals understand global events.**
 
-4. **Demo Setup** (`demo_scenarios.py`):
-   - Pre-built impressive searches
-   - Cached results for reliability
-   - Side-by-side comparisons
-
-## Development Guidelines
-
-### When Adding Features:
-1. Follow the existing pipeline pattern
-2. Add caching for any external API calls
-3. Validate all GPT JSON responses
-4. Keep prompts under 500 tokens
-5. Use type hints and docstrings
-
-### When Testing:
-- Mock expensive API calls
-- Test error paths and fallbacks
-- Verify cache behavior
-- Check performance on 1000+ articles
-
-### When Optimizing:
-- Profile before optimizing
-- Focus on API call reduction
-- Consider batch processing
-- FAISS implemented for production-ready performance
-
-## Common Tasks
+## 🛠️ Quick Development Tasks
 
 ```bash
-# Test search functionality
-python run_tests.py
-
-# Run specific test for TSMC discovery
-python test_tsmc_discovery.py
+# Test news ingestion
+python -c "from src.news_ingestion import NewsIngestionEngine; engine = NewsIngestionEngine(); print(engine.get_recent_articles(5))"
 
 # Run interactive demo
-python demo_showcase.py
+python demo_relationship_discovery.py
 
-# Clear cache (important when testing)
-rm -rf cache/
+# Explore relationships
+python explore_relationships.py search "Trump tariffs"
+python explore_relationships.py relationships 1  # For article ID 1
+python explore_relationships.py chain "Trump tariffs Mexico"
+python explore_relationships.py predict 41  # Predict impacts for TSMC drought
+python explore_relationships.py ripple 1   # Show ripple effects
+python explore_relationships.py path "US auto tariffs" "Brazilian soy exports"
+python explore_relationships.py stats      # Show system statistics
 
-# Check API usage
-# Monitor OpenAI dashboard for token usage
+# Visualize causation chains
+python visualize_chain.py "auto tariffs" "brazilian soy exports" -f both
+python visualize_chain.py "Trump tariffs" --impact-web -o my_impact_web
+
+# Generate all visualizations
+for event in "Trump tariffs" "TSMC drought" "EU fines Google"; do
+    python visualize_chain.py "$event" --impact-web --depth 3
+done
 ```
 
-## Troubleshooting
-
-- **No API Key**: Set `OPENAI_API_KEY` in .env
-- **Import Errors**: Install missing dependencies
-- **Slow Search**: Check cache misses, reduce MAX_CONTEXT_DEPTH
-- **Rate Limits**: Implement exponential backoff
-- **Memory Issues**: Reduce article batch size
-
-## Demo Strategy
-
-Best searches to showcase:
-1. "Apple iPhone sales" → Discovers TSMC drought, port congestion, labor issues
-2. "chip shortage impact" → Finds connections across multiple industries
-3. "tech regulation Europe" → Reveals cross-company regulatory impacts
-4. "AI competition market" → Shows competitive dynamics and funding trends
-
-Key metrics:
-- 50-165% more relevant content discovered
-- Full-scan finds ALL hidden connections
-- FAISS enables <100ms similarity search on 100k+ articles
-- ~$0.05-0.10 per enhanced search
-
-## Current Implementation Status
-
-✅ **Completed:**
-- FAISS integration for efficient vector search
-- Full-scan contextual discovery (checks ALL articles)
-- Comprehensive dummy dataset (24+ articles with hidden connections)
-- Rich connection explanations with impact levels
-- Batch processing for API efficiency
-- Test suite and demo showcase
-
-🚧 **TODO:**
-- Streamlit UI for interactive search
-- NewsAPI integration for real-time articles
-- Graph visualization of connections
-- Multi-hop relationship discovery
-- Performance optimization for 100k+ articles
+Remember: Every news event is connected to others. Our job is to reveal these hidden connections and help users see the complete picture.
