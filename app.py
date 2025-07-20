@@ -7,17 +7,14 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from plotly.subplots import make_subplots
 import networkx as nx
 import json
 import time
-from datetime import datetime, timedelta
-import random
 
 # Page configuration
 st.set_page_config(
     page_title="AI News Intelligence",
-    page_icon="🧠",
+    page_icon="AI",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -359,7 +356,7 @@ def display_article_card(article):
 
 def main():
     # Header
-    st.markdown("<h1 class='main-header'>🧠 AI-Powered News Intelligence</h1>", 
+    st.markdown("<h1 class='main-header'>AI-Powered News Intelligence</h1>", 
                 unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; font-size: 1.2rem; color: #666;'>Transform search from keyword matching to intelligent discovery</p>", 
                 unsafe_allow_html=True)
@@ -369,14 +366,14 @@ def main():
     demo_data = get_demo_connections()
     
     # Create tabs for navigation
-    tab1, tab2, tab3 = st.tabs(["🔍 Live Demo", "📰 All Articles", "📊 Analytics"])
+    tab1, tab2, tab3 = st.tabs(["Live Demo", "All Articles", "Analytics"])
     
     with tab1:
         # The Hook
         st.markdown("---")
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.error("🤔 **The $10 Million Question**")
+            st.error("**The $10 Million Question**")
             st.markdown("""
             **Your company's stock just dropped 8% because of Ford.**
             
@@ -388,14 +385,14 @@ def main():
         st.markdown("---")
         
         # Search Demo
-        st.header("🔍 Live Search Comparison")
+        st.header("Live Search Comparison")
         
         search_query = st.selectbox(
             "Choose a search query:",
             ["Ford stock drop", "Steel prices rising"]
         )
         
-        if st.button("🚀 Run Search Comparison", type="primary"):
+        if st.button("Run Search Comparison", type="primary"):
             # Progress bar
             progress_bar = st.progress(0)
             status_text = st.empty()
@@ -405,7 +402,7 @@ def main():
             
             with col1:
                 st.markdown("<div class='traditional-search'>", unsafe_allow_html=True)
-                st.subheader("❌ Traditional Search")
+                st.subheader("Traditional Search")
                 status_text.text("Running traditional keyword search...")
                 progress_bar.progress(25)
                 time.sleep(0.5)
@@ -416,12 +413,12 @@ def main():
                 for result in traditional_results:
                     st.write(f"• {result['title']}")
                 
-                st.warning("⚠️ Limited to direct keyword matches only!")
+                st.warning("Limited to direct keyword matches only!")
                 st.markdown("</div>", unsafe_allow_html=True)
             
             with col2:
                 st.markdown("<div class='ai-search'>", unsafe_allow_html=True)
-                st.subheader("✅ AI-Powered Discovery")
+                st.subheader("AI-Powered Discovery")
                 status_text.text("AI analyzing relationships...")
                 progress_bar.progress(50)
                 time.sleep(0.5)
